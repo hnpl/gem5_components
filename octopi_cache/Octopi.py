@@ -146,9 +146,19 @@ class OctopiCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
 
         self._dma_controllers = []
         if board.has_dma_ports():
-            for i, port in enumerate(dma_ports):
-                ctrl = DMAController(self.ruby_system.network, cache_line_size)
-                ctrl.dma_sequencer = DMASequencer(version=i+1, in_ports=port)
-                self._dma_controllers.append(ctrl)
-                ctrl.ruby_system = self.ruby_system
-            ruby_system.dma_controllers = self._dma_controllers
+            self.ruby_system.dma_controllers = [
+                DMAController(dma_sequencer=DMASequencer(version=i+1, in_ports=port),
+                              ruby_system=self.ruby_system)
+                for i, port in enumerate(board.get_dma_ports())
+            ]
+            self._dma_controllers = self.ruby_system.dma_controllers
+            self.dma_routers = [RubyRouter(self.ruby_system.network) for dma_controller in self._dma_controllers]
+            for dma_router in self.dma_routers:
+                self.ruby_system.network._add_router(dma_router)
+            self.dma_ext_links = [RubyExtLink(ext_node=dma_controller, int_node=dma_router) for dma_controller, dma_router in zip(self._dma_controllers, self.dma_routers)]
+            for link in self.dma_ext_links:
+                self.ruby_system.network._add_ext_link(link)
+            self.dma_int_links = [RubyIntLink(dma_router, self.ruby_system.network.cross_ccd_router) for dma_router in self.dma_routers] + \
+                                 [RubyIntLink(self.ruby_system.network.cross_ccd_router, dma_router) for dma_router in self.dma_routers]
+            for link in self.dma_int_links:
+                self.ruby_system.network._add_int_link(link)
