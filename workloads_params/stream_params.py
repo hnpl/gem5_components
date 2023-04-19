@@ -9,8 +9,8 @@ class STREAMParams(Params):
 
     def get_command(self) -> str:
         binary_name = "stream.hw.m5" if self.with_roi_annotations else "stream.hw"
-        path = source_path / binary_name
-        return f"{str(path)} {str(self.number_of_elements)}"
+        path = self.source_path / binary_name
+        return f"{path} {self.number_of_elements}"
 
     def get_naming_string(self) -> str:
         return "-".join(["stream", str(self.number_of_elements)])
