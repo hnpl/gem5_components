@@ -26,12 +26,13 @@ class BaseVectorParameters:
         pass
 
 class ARM_SVE_Parameters(BaseVectorParameters):
-    def __init__(self, sve_vl):
-        self.sve_vl = sve_vl
-        requires((sve_vl % 128 == 0) and (sve_vl > 0) and (sve_vl <= 2048))
+    def __init__(self, vlen):
+        self.vlen = vlen
+        # in gem5, the vector register length (vlen) is sve_vl * 128
+        requires((vlen % 128 == 0) and (vlen > 0) and (vlen <= 2048))
     @overrides(BaseVectorParameters)
     def _apply_isa_change(self, isa_object: BaseISA):
-        isa_object.sve_vl = self.sve_vl
+        isa_object.sve_vl = self.vlen // 128
 
 class RVV_Parameters(BaseVectorParameters):
     def __init__(self, elen, vlen):
@@ -39,8 +40,6 @@ class RVV_Parameters(BaseVectorParameters):
         self.vlen = vlen
     @overrides(BaseVectorParameters)
     def _apply_isa_change(self, isa_object: BaseISA):
-        from pprint import pprint
-        pprint(vars(isa_object[0]))
         isa_object[0].elen = self.elen
         isa_object[0].vlen = self.vlen
 
@@ -48,8 +47,6 @@ class SimpleVectorCore(SimpleCore):
     def __init__(self, cpu_type: CPUTypes, core_id: int, isa: ISA,
             isa_vector_parameters: BaseVectorParameters):
         super().__init__(cpu_type, core_id, isa)
-        from pprint import pprint
-        #pprint(vars(self.core))
         isa_vector_parameters.apply(self.core)
 
 class SimpleVectorProcessor(BaseCPUProcessor):
