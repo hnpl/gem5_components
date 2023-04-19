@@ -1,5 +1,5 @@
-from .params import Params
 from .isa_extensions import ISAExtension
+from .params import Params
 
 from pathlib import Path
 from typing import List
@@ -12,7 +12,7 @@ class STREAMParams(Params):
     def get_command(self) -> str:
         binary_name = ["stream", "hw"]
         if self.isa_extensions:
-            binary_name.extend(isa_entensions)
+            binary_name.extend(self.isa_extensions)
         if self.with_roi_annotations:
             binary_name.append("m5")
         binary_name = ".".join(binary_name)

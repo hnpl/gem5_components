@@ -26,7 +26,7 @@ class NPBClass:
 
 class NPBParams(Params):
     def __init__(self, source_path: Path, with_roi_annotations: bool, benchmark: NPBBenchmark, size: NPBClass) -> None:
-        super().__init__(source_path, with_roi_annotations)
+        super().__init__(source_path, with_roi_annotations, isa_extensions = [])
         self.benchmark = benchmark
         self.size = size
 

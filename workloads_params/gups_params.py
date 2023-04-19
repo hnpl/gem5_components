@@ -1,6 +1,8 @@
+from .isa_extensions import ISAExtension
 from .params import Params
 
 from pathlib import Path
+from typing import List
 
 def isPowerOf2(n):
     return (n & (n - 1)) == 0
@@ -16,7 +18,7 @@ class GUPSParams(Params):
     def get_command(self) -> str:
         binary_name = ["gups", "hw"]
         if self.isa_extensions:
-            binary_name.extend(isa_entensions)
+            binary_name.extend(self.isa_extensions)
         if self.with_roi_annotations:
             binary_name.append("m5")
         binary_name = ".".join(binary_name)
