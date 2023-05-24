@@ -4,7 +4,7 @@ from .params import Params
 from pathlib import Path
 from typing import List
 
-class GUPSParams(Params):
+class PermutatingGatherParams(Params):
     def __init__(self, source_path: Path, with_roi_annotations: bool, seed: int, mod: int, isa_extensions: List[ISAExtension] = []) -> None:
         super().__init__(source_path, with_roi_annotations, isa_extensions)
         self.seed = seed
