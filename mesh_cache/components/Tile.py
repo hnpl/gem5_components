@@ -15,5 +15,9 @@ class Tile(SubSystem, RubyNetworkComponent):
         SubSystem.__init__(self=self)
         RubyNetworkComponent.__init__(self=self)
 
+        self._board = board
+        self._ruby_system = ruby_system
+        self._cache_line_size = cache_line_size
+
         self.cross_tile_router = RubyRouter(ruby_system.network)
         self._add_router(self.cross_tile_router)

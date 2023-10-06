@@ -17,6 +17,7 @@ from .components.L3Slice import L3Slice
 from .components.MeshDescriptor import MeshTracker, NodeType
 from .components.MeshNetwork import MeshNetwork
 from .components.NetworkComponents import RubyNetworkComponent
+from .utils.SizeArithmetic import SizeArithmetic
 
 class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
     def __init__(
@@ -90,25 +91,29 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
 
     def _create_core_tiles(self, board: AbstractBoard) -> None:
         core_tile_coordinates = self._mesh_descriptor.get_tiles_coordinates(NodeType.CoreTile)
-        for core, core_tile_coordinate in zip(board.get_processor().get_cores(), core_tile_coordinates):
-            # create a core tile with Private Split L1 and Private L2
-            # CoreTile also does all external/internal routing of Core <-> L1 <-> L2
-            core_tile = CoreTile(
-                board = board,
-                ruby_system = self.ruby_system,
-                core = core,
-                l1i_size = self._l1i_size,
-                l1i_associativity = self._l1i_assoc,
-                l1d_size = self._l1d_size,
-                l1d_associativity = self._l1d_assoc,
-                l2_size = self._l2_size,
-                l2_associativity = self._l2_assoc,
-                coordinate = core_tile_coordinate
-            )
-            self.ruby_system.num_of_sequencers += 1
-            self._core_tiles.append(core_tile)
-            self.ruby_system.network.incorporate_ruby_subsystem(core_tile)
+        cores = board.get_processor().get_cores()
+        num_l3_slices = len(cores)
+        l3_slice_size = (SizeArithmetic(self._l3_size) // num_l3_slices).get()
+        self.core_tiles = [CoreTile(
+            board = board,
+            ruby_system = self.ruby_system,
+            core = core,
+            core_id = core_id,
+            l1i_size = self._l1i_size,
+            l1i_associativity = self._l1i_assoc,
+            l1d_size = self._l1d_size,
+            l1d_associativity = self._l1d_assoc,
+            l2_size = self._l2_size,
+            l2_associativity = self._l2_assoc,
+            l3_slice_size = l3_slice_size,
+            l3_associativity = self._l3_assoc,
+            coordinate = core_tile_coordinate
+        ) for core_id, (core, core_tile_coordinate) in enumerate(zip(cores, core_tile_coordinates))]
+        for tile in self.core_tiles:
+            self.ruby_system.network.incorporate_ruby_subsystem(tile)
+        self.ruby_system.num_of_sequencers += len(cores)
 
+"""
     def _create_L3_slices(self):
         # create the cache slices
         self.l3_slices = [L3Slice(
@@ -136,3 +141,4 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
             self._add_router(self.l3_router)
         for link in self.l3_router_links:
             self._add_ext_link(link)
+"""

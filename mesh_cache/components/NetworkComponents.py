@@ -12,6 +12,18 @@ class RubyNetworkComponent():
         self._ext_links.append(link)
     def _add_int_link(self, link):
         self._int_links.append(link)
+    def create_router(self, ruby_system):
+        new_router = RubyRouter(ruby_system.network)
+        self._add_router(new_router)
+        return new_router
+    def create_ext_link(self, ext_node, int_node, bandwidth_factor=16):
+        new_ext_link = RubyExtLink(ext_node, int_node, bandwidth_factor)
+        self._add_ext_link(new_ext_link)
+        return new_ext_link
+    def create_int_link(self, src_node, dst_node, bandwidth_factor=16):
+        new_int_link = RubyIntLink(src_node, dst_node, bandwidth_factor)
+        self._add_int_link(new_int_link)
+        return new_int_link
     def get_routers(self):
         return self._routers
     def get_ext_links(self):
