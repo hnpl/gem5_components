@@ -3,11 +3,12 @@ from gem5.components.cachehierarchies.chi.nodes.abstract_node import AbstractNod
 from m5.objects import NULL, RubyCache
 
 class L3Slice(AbstractNode):
-    def __init__(self, size, associativity, network, cache_line_size, clk_domain):
-        super().__init__(network, cache_line_size)
+    def __init__(self, size, associativity, ruby_system, cache_line_size, clk_domain):
+        super().__init__(ruby_system.network, cache_line_size)
         self.cache = RubyCache(size=size, assoc=associativity, start_index_bit=self.getBlockSizeBits())
         self.clk_domain = clk_domain
         self.use_prefetcher = False
+        self.ruby_system = ruby_system
 
         # From CMN
         # Only used for L1 controllers
