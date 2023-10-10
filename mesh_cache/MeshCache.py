@@ -153,7 +153,7 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
             dma_id = dma_id
         ) for dma_id, (dma_tile_coordinate, dma_port) in enumerate(zip(dma_tile_coordinates, board.get_dma_ports()))]
         for tile in self.dma_tiles:
-            self.ruby_system.network.incorporate_cache(tile)
+            self.ruby_system.network.incorporate_ruby_subsystem(tile)
 
     def _set_downstream_destinations(self) -> None:
         all_l3_slices = [tile.l3_slice for tile in self.core_tiles]
