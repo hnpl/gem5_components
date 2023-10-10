@@ -10,7 +10,7 @@ from gem5.components.cachehierarchies.chi.nodes.dma_requestor import DMARequesto
 from gem5.components.cachehierarchies.chi.nodes.memory_controller import MemoryController
 from gem5.components.cachehierarchies.chi.nodes.abstract_node import AbstractNode
 
-from m5.objects import RubySystem
+from m5.objects import RubySystem, RubyPortProxy
 
 from .components.CoreTile import CoreTile
 from .components.L3Slice import L3Slice
@@ -68,6 +68,7 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
         self._create_memory_tiles(board)
         self._set_l2_l3_downstream_destinations()
         self.ruby_system.network.create_mesh()
+        self._incorperate_system_ports(board)
 
         self._finalize_ruby_system()
 
@@ -92,6 +93,8 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
         self.ruby_system.network.ext_links = self.ruby_system.network._ext_links
         self.ruby_system.network.routers = self.ruby_system.network._routers
         self.ruby_system.network.setup_buffers()
+        from pprint import pprint
+        pprint(vars(self.ruby_system.network))
 
     def _create_core_tiles(self, board: AbstractBoard) -> None:
         core_tile_coordinates = self._mesh_descriptor.get_tiles_coordinates(NodeType.CoreTile)
@@ -128,7 +131,16 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
             address_range = address_range,
             memory_port = memory_port
         ) for mem_tile_coordinate, (address_range, memory_port) in zip(mem_tile_coordinates, board.get_mem_ports())]
+        for tile in self.memory_tiles:
+            self.ruby_system.network.incorporate_ruby_subsystem(tile)
 
     def _set_l2_l3_downstream_destinations(self) -> None:
+        all_l3_slices = [tile.l3_slice for tile in self.core_tiles]
+        all_mem_ctrls = [mem_tile.memory_controller for mem_tile in self.memory_tiles]
         for tile in self.core_tiles:
-            tile.set_l3_downstream_destinations([mem_tile.memory_controller for mem_tile in self.memory_tiles])
+            tile.set_l2_downstream_destinations(all_l3_slices)
+            tile.set_l3_downstream_destinations(all_mem_ctrls)
+
+    def _incorperate_system_ports(self, board: AbstractBoard) -> None:
+        self.ruby_system.sys_port_proxy = RubyPortProxy()
+        board.connect_system_port(self.ruby_system.sys_port_proxy.in_ports)
