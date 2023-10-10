@@ -2,7 +2,7 @@ from gem5.components.boards.abstract_board import AbstractBoard
 from gem5.components.processors.abstract_core import AbstractCore
 from gem5.isas import ISA
 
-from m5.objects import SubSystem, RubySystem, NULL, RubySequencer, RubyController
+from m5.objects import SubSystem, RubySystem, NULL, RubyController, RubySequencer
 
 from .L1Cache import L1Cache
 from .L2Cache import L2Cache
@@ -86,15 +86,19 @@ class CoreTile(Tile):
             clk_domain = self._board.get_clock_domain()
         )
 
+        l1i_cache_sequencer_id = self._ruby_system.network.get_next_sequencer_id()
         self.l1i_cache.sequencer = RubySequencer(
-            version = self._core_id,
+            version = l1i_cache_sequencer_id,
+            coreid = l1i_cache_sequencer_id,
             dcache = NULL,
             clk_domain = self.l1i_cache.clk_domain,
             ruby_system = self._ruby_system
         )
 
+        l1d_cache_sequencer_id = self._ruby_system.network.get_next_sequencer_id()
         self.l1d_cache.sequencer = RubySequencer(
-            version = self._core_id,
+            version = l1d_cache_sequencer_id,
+            coreid = l1d_cache_sequencer_id,
             dcache = self.l1d_cache.cache,
             clk_domain = self.l1d_cache.clk_domain,
             ruby_system = self._ruby_system

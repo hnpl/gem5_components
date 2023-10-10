@@ -1,5 +1,5 @@
 from m5.objects import ClockDomain, NULL
-from m5.objects import RubyCache, RubyNetwork, RubySequencer, RubyController, RubySystem
+from m5.objects import RubyCache, RubyNetwork, RubyController, RubySystem
 
 from gem5.components.cachehierarchies.chi.nodes.abstract_node import AbstractNode
 

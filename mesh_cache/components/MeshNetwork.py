@@ -19,7 +19,15 @@ class MeshNetwork(SimpleNetwork, RubyNetworkComponent):
         self.netifs = []
 
         self._tile_routers = []
+        self._sequencer_tracker = 0
         self._mesh_descriptor = mesh_descriptor
+
+    def get_num_sequencers(self):
+        return self._sequencer_tracker
+
+    def get_next_sequencer_id(self):
+        self._sequencer_tracker += 1
+        return self._sequencer_tracker - 1
 
     def create_mesh(self) -> None:
         mesh_width = self._mesh_descriptor.get_width()

@@ -1,7 +1,7 @@
 from gem5.components.boards.abstract_board import AbstractBoard
 from gem5.components.cachehierarchies.chi.nodes.memory_controller import MemoryController
 
-from m5.objects import SubSystem, RubySystem, NULL, RubySequencer, RubyController, AddrRange, Port
+from m5.objects import SubSystem, RubySystem, NULL, RubyController, AddrRange, Port
 
 from .MeshDescriptor import Coordinate, MeshTracker
 from .Tile import Tile

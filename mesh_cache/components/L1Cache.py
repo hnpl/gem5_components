@@ -1,5 +1,5 @@
 from m5.objects import ClockDomain
-from m5.objects import RubyCache, RubyNetwork, RubySequencer, RubyController, RubySystem
+from m5.objects import RubyCache, RubyNetwork, RubyController, RubySystem
 
 from gem5.components.boards.abstract_board import AbstractBoard
 from gem5.components.processors.abstract_core import AbstractCore

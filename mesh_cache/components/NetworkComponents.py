@@ -1,4 +1,4 @@
-from m5.objects import Switch, SimpleIntLink, SimpleExtLink
+from m5.objects import Switch, SimpleIntLink, SimpleExtLink, RubySequencer
 
 class RubyNetworkComponent():
     def __init__(self):
