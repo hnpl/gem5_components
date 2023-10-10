@@ -14,6 +14,7 @@ from m5.objects import RubySystem
 
 from .components.CoreTile import CoreTile
 from .components.L3Slice import L3Slice
+from .components.MemTile import MemTile
 from .components.MeshDescriptor import MeshTracker, NodeType
 from .components.MeshNetwork import MeshNetwork
 from .components.NetworkComponents import RubyNetworkComponent
@@ -64,6 +65,9 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
         self._get_board_info(board)
 
         self._create_core_tiles(board)
+        self._create_memory_tiles(board)
+        self._set_l2_l3_downstream_destinations()
+        self.ruby_system.network.create_mesh()
 
         self._finalize_ruby_system()
 
@@ -97,6 +101,8 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
         self.core_tiles = [CoreTile(
             board = board,
             ruby_system = self.ruby_system,
+            coordinate = core_tile_coordinate,
+            mesh_descriptor = self._mesh_descriptor,
             core = core,
             core_id = core_id,
             l1i_size = self._l1i_size,
@@ -106,39 +112,23 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
             l2_size = self._l2_size,
             l2_associativity = self._l2_assoc,
             l3_slice_size = l3_slice_size,
-            l3_associativity = self._l3_assoc,
-            coordinate = core_tile_coordinate
+            l3_associativity = self._l3_assoc
         ) for core_id, (core, core_tile_coordinate) in enumerate(zip(cores, core_tile_coordinates))]
         for tile in self.core_tiles:
             self.ruby_system.network.incorporate_ruby_subsystem(tile)
-        self.ruby_system.num_of_sequencers += len(cores)
+        self.ruby_system.num_of_sequencers += len(cores) * 2
 
-"""
-    def _create_L3_slices(self):
-        # create the cache slices
-        self.l3_slices = [L3Slice(
-            size = self._l3_size,
-            associativity = self._l3_assoc,
+    def _create_memory_tiles(self, board: AbstractBoard) -> None:
+        mem_tile_coordinates = self._mesh_descriptor.get_tiles_coordinates(NodeType.MemTile)
+        self.memory_tiles = [MemTile(
+            board = board,
             ruby_system = self.ruby_system,
-            cache_line_size = self._cache_line_size,
-            clk_domain = self._clk_domain
-        ) for i in range(self._per_ccd_num_cores)]
+            coordinate = mem_tile_coordinate,
+            mesh_descriptor = self._mesh_descriptor,
+            address_range = address_range,
+            memory_port = memory_port
+        ) for mem_tile_coordinate, (address_range, memory_port) in zip(mem_tile_coordinates, board.get_mem_ports())]
 
-        # create one router per cache slice
-        self.l3_routers = [
-            RubyRouter(self.ruby_system)
-            for i in range()
-        ]
-
-        # router <-----ExtLink-----> cache_slice
-        self.l3_router_links = [RubyExtLink(
-            ext_node=l3_slice,
-            int_node=l3_router
-        ) for l3_slice, l3_router in zip(self.l3_slices, self.l3_routers)]
-
-        # add created links and routers to the network
-        for l3_router in self.l3_routers:
-            self._add_router(self.l3_router)
-        for link in self.l3_router_links:
-            self._add_ext_link(link)
-"""
+    def _set_l2_l3_downstream_destinations(self) -> None:
+        for tile in self.core_tiles:
+            tile.set_l3_downstream_destinations([mem_tile.memory_controller for mem_tile in self.memory_tiles])

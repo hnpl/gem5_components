@@ -7,13 +7,15 @@ from m5.objects import SubSystem, RubySystem, NULL, RubySequencer, RubyControlle
 from .L1Cache import L1Cache
 from .L2Cache import L2Cache
 from .L3Slice import L3Slice
-from .MeshDescriptor import Coordinate
+from .MeshDescriptor import Coordinate, MeshTracker
 from .Tile import Tile
 
 class CoreTile(Tile):
     def __init__(self,
         board: AbstractBoard,
         ruby_system: RubySystem,
+        coordinate: Coordinate,
+        mesh_descriptor: MeshTracker,
         core: AbstractCore,
         core_id: int,
         l1i_size: str,
@@ -23,10 +25,9 @@ class CoreTile(Tile):
         l2_size: str,
         l2_associativity: int,
         l3_slice_size: str,
-        l3_associativity: int,
-        coordinate: Coordinate
+        l3_associativity: int
     ) -> None:
-        Tile.__init__(self=self, board=board, ruby_system=ruby_system, cache_line_size=board.cache_line_size)
+        Tile.__init__(self=self, board=board, ruby_system=ruby_system, coordinate=coordinate, mesh_descriptor=mesh_descriptor)
 
         self._core = core
         self._core_id = core_id
@@ -38,7 +39,6 @@ class CoreTile(Tile):
         self._l2_associativity = l2_associativity
         self._l3_slice_size = l3_slice_size
         self._l3_associativity = l3_associativity
-        self._coordinate = coordinate
 
         self._create_private_caches()
         self._create_links()
@@ -46,6 +46,10 @@ class CoreTile(Tile):
     def set_l2_downstream_destinations(self, destionations: list[RubyController]) -> None:
         # the destinations of each l2_cache should be all of L3 slices / MemCtrl
         self.l2_cache.downstream_destinations = destionations
+
+    def set_l3_downstream_destinations(self, destionations: list[RubyController]) -> None:
+        # the destinations of each l2_cache should be all of L3 slices / MemCtrl
+        self.l3_slice.downstream_destinations = destionations
 
     def _create_private_caches(self):
         self.l1i_cache = L1Cache(

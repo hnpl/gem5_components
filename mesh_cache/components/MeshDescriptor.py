@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional, Tuple
 
 from .NetworkComponents import RubyRouter, RubyExtLink
 
@@ -6,6 +6,14 @@ class Coordinate:
     def __init__(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
+    def get_north(self) -> "Coordinate":
+        return Coordinate(self.x, self.y-1)
+    def get_south(self) -> "Coordinate":
+        return Coordinate(self.x, self.y+1)
+    def get_west(self) -> "Coordinate":
+        return Coordinate(self.x-1, self.y)
+    def get_east(self) -> "Coordinate":
+        return Coordinate(self.x+1, self.y)
     def get_hash(self) -> tuple[int, int]:
         return (self.x, self.y)
     def __str__(self) -> str:
@@ -45,7 +53,7 @@ class MeshTracker:
         self.name = name
         self.grid_tracker = {}
         self.node_cross_tile_router = {}
-        self.node_ext_link = {}
+        #self.node_ext_link = {}
     def add_node(self, coordinate: Coordinate, node_type: NodeType) -> None:
         new_node = MeshNode(coordinate, node_type)
         assert(not coordinate.get_hash() in self.grid_tracker, "Trying to add an occupied node")
@@ -53,16 +61,28 @@ class MeshTracker:
     def add_cross_tile_router(self, coordinate: Coordinate, router: RubyRouter) -> None:
         assert(coordinate.get_hash() in self.grid_tracker, f"Node with coordinate {coordinate} does not exist")
         self.node_cross_tile_router[coordinate.get_hash()] = router
-    def add_ext_link(self, coordinate: Coordinate, ext_link: RubyExtLink) -> None:
-        assert(coordinate.get_hash() in self.grid_tracker, f"Node with coordinate {coordinate} does not exist")
-        self.node_ext_link[coordinate.get_hash()] = ext_link
+    #def add_ext_link(self, coordinate: Coordinate, ext_link: RubyExtLink) -> None:
+    #    assert(coordinate.get_hash() in self.grid_tracker, f"Node with coordinate {coordinate} does not exist")
+    #    self.node_ext_link[coordinate.get_hash()] = ext_link
     def get_sorted_coordinate(self) -> list[Coordinate]:
         coor = list(self.grid_tracker.keys())
         width = self.get_width()
         coor = sorted(coor, key=lambda k: k[1]*width+k[0])
         return coor
-    def get_node(self, coordinate: Coordinate) -> MeshNode:
+    def has_node(self, coordinate: Coordinate) -> bool:
+        return coordinate.get_hash() in self.grid_tracker
+    def get_node(self, coordinate: Coordinate) -> Optional[MeshNode]:
+        if not self.has_node(coordinate):
+            return None
         return self.grid_tracker[coordinate.get_hash()]
+    def get_north_neighbor(self, coordinate: Coordinate) -> Optional[MeshNode]:
+        return self.get_node(coordinate.get_north())
+    def get_south_neighbor(self, coordinate: Coordinate) -> Optional[MeshNode]:
+        return self.get_node(coordinate.get_south())
+    def get_west_neighbor(self, coordinate: Coordinate) -> Optional[MeshNode]:
+        return self.get_node(coordinate.get_west())
+    def get_east_neighbor(self, coordinate: Coordinate) -> Optional[MeshNode]:
+        return self.get_node(coordinate.get_east())
     def get_nodes(self) -> list[MeshNode]:
         return list(self.grid_tracker.values())
     def get_cross_tile_router(self, coordinate: Coordinate) -> RubyRouter:
