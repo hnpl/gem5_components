@@ -25,7 +25,7 @@ class DMATile(Tile):
         )
         self.dma_controller.ruby_system = ruby_system
 
-        self.sequencer = RubySequencer(
+        self.dma_controller.sequencer = RubySequencer(
             version = self._ruby_system.network.get_next_sequencer_id(),
             in_ports = dma_port,
             dcache = NULL,

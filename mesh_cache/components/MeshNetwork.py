@@ -33,6 +33,11 @@ class MeshNetwork(SimpleNetwork, RubyNetworkComponent):
         mesh_width = self._mesh_descriptor.get_width()
         mesh_height = self._mesh_descriptor.get_height()
 
+        self._north_links = []
+        self._south_links = []
+        self._west_links = []
+        self._east_links = []
+
         for y in range(mesh_height):
             for x in range(mesh_width):
                 curr_node_coordinate = Coordinate(x, y)
@@ -43,34 +48,44 @@ class MeshNetwork(SimpleNetwork, RubyNetworkComponent):
                 north_neighbor_coordinate = curr_node_coordinate.get_north()
                 if self._mesh_descriptor.has_node(north_neighbor_coordinate):
                     print("---------------- N Link from", curr_node_coordinate, north_neighbor_coordinate)
-                    self.north_link = self.create_int_link(
+                    self._north_links.append(self.create_int_link(
                         self._mesh_descriptor.get_cross_tile_router(curr_node_coordinate),
                         self._mesh_descriptor.get_cross_tile_router(north_neighbor_coordinate)
-                    )
+                    ))
 
                 # South
                 south_neighbor_coordinate = curr_node_coordinate.get_south()
                 if self._mesh_descriptor.has_node(south_neighbor_coordinate):
                     print("---------------- S Link from", curr_node_coordinate, south_neighbor_coordinate)
-                    self.south_link = self.create_int_link(
+                    self._south_links.append(self.create_int_link(
                         self._mesh_descriptor.get_cross_tile_router(curr_node_coordinate),
                         self._mesh_descriptor.get_cross_tile_router(south_neighbor_coordinate)
-                    )
+                    ))
 
                 # West
                 west_neighbor_coordinate = curr_node_coordinate.get_west()
                 if self._mesh_descriptor.has_node(west_neighbor_coordinate):
                     print("---------------- W Link from", curr_node_coordinate, west_neighbor_coordinate)
-                    self.west_link = self.create_int_link(
+                    self._west_links.append(self.create_int_link(
                         self._mesh_descriptor.get_cross_tile_router(curr_node_coordinate),
                         self._mesh_descriptor.get_cross_tile_router(west_neighbor_coordinate)
-                    )
+                    ))
 
                 # East
                 east_neighbor_coordinate = curr_node_coordinate.get_east()
                 if self._mesh_descriptor.has_node(east_neighbor_coordinate):
                     print("---------------- E Link from", curr_node_coordinate, east_neighbor_coordinate)
-                    self.east_link = self.create_int_link(
+                    self._east_links.append(self.create_int_link(
                         self._mesh_descriptor.get_cross_tile_router(curr_node_coordinate),
                         self._mesh_descriptor.get_cross_tile_router(east_neighbor_coordinate)
-                    )
+                    ))
+
+        # gem5 doesn't like empty arrays
+        if self._north_links:
+            self.north_links = self._north_links
+        if self._south_links:
+            self.south_links = self._south_links
+        if self._west_links:
+            self.west_links = self._west_links
+        if self._east_links:
+            self.east_links = self._east_links
