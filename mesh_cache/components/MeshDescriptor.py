@@ -66,8 +66,8 @@ class MeshTracker:
     #    self.node_ext_link[coordinate.get_hash()] = ext_link
     def get_sorted_coordinate(self) -> list[Coordinate]:
         coor = list(self.grid_tracker.keys())
-        width = self.get_width()
-        coor = sorted(coor, key=lambda k: k[1]*width+k[0])
+        height = self.get_height()
+        coor = sorted(coor, key=lambda k: k[0]*height+k[1])
         return coor
     def has_node(self, coordinate: Coordinate) -> bool:
         return coordinate.get_hash() in self.grid_tracker
@@ -93,6 +93,10 @@ class MeshTracker:
         coor = self.get_sorted_coordinate()
         filtered_coor = filter(lambda c: self.grid_tracker[c].node_type == tile_type, coor)
         return list(map(Coordinate.create_coordinate_from_tuple, filtered_coor))
+    def get_num_core_tiles(self):
+        return len(self.get_tiles_coordinates(NodeType.CoreTile))
+    def get_num_mem_tiles(self):
+        return len(self.get_tiles_coordinates(NodeType.MemTile))
     def get_width(self) -> int:
         max_x = -1
         for x, y in self.grid_tracker.keys():

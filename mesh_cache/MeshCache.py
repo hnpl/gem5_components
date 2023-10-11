@@ -1,3 +1,5 @@
+from math import log2
+
 from gem5.utils.requires import requires
 from gem5.utils.override import overrides
 from gem5.coherence_protocol import CoherenceProtocol
@@ -10,7 +12,7 @@ from gem5.components.cachehierarchies.chi.nodes.dma_requestor import DMARequesto
 from gem5.components.cachehierarchies.chi.nodes.memory_controller import MemoryController
 from gem5.components.cachehierarchies.chi.nodes.abstract_node import AbstractNode
 
-from m5.objects import RubySystem, RubyPortProxy, RubySequencer
+from m5.objects import RubySystem, RubyPortProxy, RubySequencer, AddrRange
 
 from .components.CoreTile import CoreTile
 from .components.DMATile import DMATile
@@ -62,18 +64,12 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
         self._get_board_info(board)
 
         self._create_core_tiles(board)
+        self._assign_l3_slice_addr_range(board)
         self._create_memory_tiles(board)
         self._create_dma_tiles(board)
         self._set_downstream_destinations()
         self.ruby_system.network.create_mesh()
         self._incorperate_system_ports(board)
-
-        count = 0
-        if board.has_dma_ports():
-            count = 0
-            for i, p in enumerate(board.get_dma_ports()):
-                count += 1
-        print("DMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", count)
 
         self._finalize_ruby_system()
 
@@ -95,7 +91,6 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
     # should be called at the END of incorporate_cache()
     def _finalize_ruby_system(self) -> None:
         self.ruby_system.num_of_sequencers = self.ruby_system.network.get_num_sequencers()
-        print("DMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", self.ruby_system.num_of_sequencers)
         self.ruby_system.network.int_links = self.ruby_system.network._int_links
         self.ruby_system.network.ext_links = self.ruby_system.network._ext_links
         self.ruby_system.network.routers = self.ruby_system.network._routers
@@ -124,6 +119,30 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
         ) for core_id, (core, core_tile_coordinate) in enumerate(zip(cores, core_tile_coordinates))]
         for tile in self.core_tiles:
             self.ruby_system.network.incorporate_ruby_subsystem(tile)
+
+    def _find_board_mem_start(self, board: AbstractBoard) -> None:
+        mem_start = 1 << 64
+        for r in board.mem_ranges:
+            mem_start = min(r.start.value, mem_start)
+        return mem_start
+
+    def _assign_l3_slice_addr_range(self, board: AbstractBoard) -> None:
+        #mem_start = board.get_memory().get_start_addr()
+        mem_start = self._find_board_mem_start(board)
+        mem_size = board.get_memory().get_size()
+        interleaving_size = "64B"
+        num_offset_bits = int(log2(SizeArithmetic(interleaving_size).bytes))
+        num_l3_slices = len(self.core_tiles)
+        num_slice_indexing_bits = int(log2(num_l3_slices))
+        address_ranges = [AddrRange(
+            start = mem_start,
+            size = mem_size,
+            intlvHighBit = num_offset_bits + num_slice_indexing_bits - 1,
+            intlvBits = num_slice_indexing_bits,
+            intlvMatch = i
+        ) for i in range(num_l3_slices)]
+        for address_range, tile in zip(address_ranges, self.core_tiles):
+            tile.l3_slice.addr_ranges = address_range
 
     def _create_memory_tiles(self, board: AbstractBoard) -> None:
         mem_tile_coordinates = self._mesh_descriptor.get_tiles_coordinates(NodeType.MemTile)
