@@ -1,4 +1,4 @@
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, List
 
 from .NetworkComponents import RubyRouter, RubyExtLink
 
@@ -14,7 +14,7 @@ class Coordinate:
         return Coordinate(self.x-1, self.y)
     def get_east(self) -> "Coordinate":
         return Coordinate(self.x+1, self.y)
-    def get_hash(self) -> tuple[int, int]:
+    def get_hash(self) -> Tuple[int, int]:
         return (self.x, self.y)
     def __str__(self) -> str:
         return f"({self.x}, {self.y})"
@@ -64,7 +64,7 @@ class MeshTracker:
     #def add_ext_link(self, coordinate: Coordinate, ext_link: RubyExtLink) -> None:
     #    assert(coordinate.get_hash() in self.grid_tracker, f"Node with coordinate {coordinate} does not exist")
     #    self.node_ext_link[coordinate.get_hash()] = ext_link
-    def get_sorted_coordinate(self) -> list[Coordinate]:
+    def get_sorted_coordinate(self) -> List[Coordinate]:
         coor = list(self.grid_tracker.keys())
         height = self.get_height()
         coor = sorted(coor, key=lambda k: k[0]*height+k[1])
@@ -83,13 +83,13 @@ class MeshTracker:
         return self.get_node(coordinate.get_west())
     def get_east_neighbor(self, coordinate: Coordinate) -> Optional[MeshNode]:
         return self.get_node(coordinate.get_east())
-    def get_nodes(self) -> list[MeshNode]:
+    def get_nodes(self) -> List[MeshNode]:
         return list(self.grid_tracker.values())
     def get_cross_tile_router(self, coordinate: Coordinate) -> RubyRouter:
         return self.node_cross_tile_router[coordinate.get_hash()]
     def get_ext_link(self, coordinate: Coordinate) -> RubyExtLink:
         return self.node_ext_link[coordinate.get_hash()]
-    def get_tiles_coordinates(self, tile_type: NodeType) -> list[Coordinate]:
+    def get_tiles_coordinates(self, tile_type: NodeType) -> List[Coordinate]:
         coor = self.get_sorted_coordinate()
         filtered_coor = filter(lambda c: self.grid_tracker[c].node_type == tile_type, coor)
         return list(map(Coordinate.create_coordinate_from_tuple, filtered_coor))

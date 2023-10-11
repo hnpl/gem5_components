@@ -1,3 +1,5 @@
+from typing import List
+
 from gem5.components.boards.abstract_board import AbstractBoard
 from gem5.components.processors.abstract_core import AbstractCore
 from gem5.isas import ISA
@@ -43,11 +45,11 @@ class CoreTile(Tile):
         self._create_private_caches()
         self._create_links()
     
-    def set_l2_downstream_destinations(self, destionations: list[RubyController]) -> None:
+    def set_l2_downstream_destinations(self, destionations: List[RubyController]) -> None:
         # the destinations of each l2_cache should be all of L3 slices / MemCtrl
         self.l2_cache.downstream_destinations = destionations
 
-    def set_l3_downstream_destinations(self, destionations: list[RubyController]) -> None:
+    def set_l3_downstream_destinations(self, destionations: List[RubyController]) -> None:
         # the destinations of each l2_cache should be all of L3 slices / MemCtrl
         self.l3_slice.downstream_destinations = destionations
 
