@@ -182,7 +182,7 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
             tile.set_l3_downstream_destinations(all_mem_ctrls)
         if self._has_dma:
             for tile in self.dma_tiles:
-                tile.dma_controller.downstream_destinations = all_mem_ctrls
+                tile.dma_controller.downstream_destinations = all_l3_slices
 
     def _incorperate_system_ports(self, board: AbstractBoard) -> None:
         self.ruby_system.sys_port_proxy = RubyPortProxy()
