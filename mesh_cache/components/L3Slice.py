@@ -24,18 +24,16 @@ class L3Slice(AbstractNode):
         self.alloc_on_seq_acc = False  # Does not apply to L3
         self.alloc_on_seq_line_write = False
 
-        self.alloc_on_readshared = (
-            False  # I think this should be True for perf
-        )
+        self.alloc_on_readshared = True
         self.alloc_on_readunique = False
-        self.alloc_on_readonce = False
+        self.alloc_on_readonce = True
 
         # insert on writeback (victim cache)
         self.alloc_on_writeback = True
 
         # Keep the line if a requestor asks for unique/shared
         ###########################
-        self.dealloc_on_unique = False
+        self.dealloc_on_unique = True
         self.dealloc_on_shared = False
         ###########################
 
