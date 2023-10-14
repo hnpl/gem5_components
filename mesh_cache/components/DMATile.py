@@ -31,6 +31,9 @@ class DMATile(Tile):
             dcache = NULL,
             ruby_system = ruby_system
         )
+        self.dma_controller.sequencer.is_cpu_sequencer = False
+        self.dma_controller.dealloc_backinv_shared = False
+        self.dma_controller.dealloc_backinv_unique = False
 
         self._create_links()
 
