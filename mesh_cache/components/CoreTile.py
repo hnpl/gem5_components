@@ -91,7 +91,7 @@ class CoreTile(Tile):
         l1i_cache_sequencer_id = self._ruby_system.network.get_next_sequencer_id()
         self.l1i_cache.sequencer = RubySequencer(
             version = l1i_cache_sequencer_id,
-            coreid = l1i_cache_sequencer_id,
+            coreid = self._core_id,
             dcache = NULL,
             clk_domain = self.l1i_cache.clk_domain,
             ruby_system = self._ruby_system
@@ -100,7 +100,7 @@ class CoreTile(Tile):
         l1d_cache_sequencer_id = self._ruby_system.network.get_next_sequencer_id()
         self.l1d_cache.sequencer = RubySequencer(
             version = l1d_cache_sequencer_id,
-            coreid = l1d_cache_sequencer_id,
+            coreid = self._core_id,
             dcache = self.l1d_cache.cache,
             clk_domain = self.l1d_cache.clk_domain,
             ruby_system = self._ruby_system

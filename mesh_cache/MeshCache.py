@@ -107,7 +107,7 @@ class MeshCache(AbstractRubyCacheHierarchy, AbstractThreeLevelCacheHierarchy):
             coordinate = core_tile_coordinate,
             mesh_descriptor = self._mesh_descriptor,
             core = core,
-            core_id = core_id,
+            core_id = core_id//2,
             l1i_size = self._l1i_size,
             l1i_associativity = self._l1i_assoc,
             l1d_size = self._l1d_size,
