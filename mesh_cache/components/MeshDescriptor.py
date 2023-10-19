@@ -25,13 +25,15 @@ class Coordinate:
 class NodeType:
     EmptyTile = 0
     CoreTile = 1
-    MemTile = 2
-    DMATile = 3
+    L3OnlyTile = 2
+    MemTile = 3
+    DMATile = 4
     @classmethod
     def to_string(cls, obj: "NodeType") -> str:
         name_map = {
             NodeType.EmptyTile: "EmptyTile",
             NodeType.CoreTile: "CoreTile",
+            NodeType.L3OnlyTile: "L3OnlyTile",
             NodeType.MemTile: "MemTile",
             NodeType.DMATile: "DMATile"
         }
@@ -95,6 +97,8 @@ class MeshTracker:
         return list(map(Coordinate.create_coordinate_from_tuple, filtered_coor))
     def get_num_core_tiles(self):
         return len(self.get_tiles_coordinates(NodeType.CoreTile))
+    def get_num_l3_slices(self): # tiles that have an L3 slice
+        return len(self.get_tiles_coordinates(NodeType.CoreTile)) + len(self.get_tiles_coordinates(NodeType.L3OnlyTile))
     def get_num_mem_tiles(self):
         return len(self.get_tiles_coordinates(NodeType.MemTile))
     def get_width(self) -> int:

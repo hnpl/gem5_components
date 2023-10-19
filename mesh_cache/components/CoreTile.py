@@ -42,7 +42,7 @@ class CoreTile(Tile):
         self._l3_slice_size = l3_slice_size
         self._l3_associativity = l3_associativity
 
-        self._create_private_caches()
+        self._create_caches()
         self._create_links()
     
     def set_l2_downstream_destinations(self, destionations: List[RubyController]) -> None:
@@ -53,7 +53,7 @@ class CoreTile(Tile):
         # the destinations of each l2_cache should be all of L3 slices / MemCtrl
         self.l3_slice.downstream_destinations = destionations
 
-    def _create_private_caches(self):
+    def _create_caches(self):
         self.l1i_cache = L1Cache(
             size = self._l1i_size,
             associativity = self._l1i_associativity,
